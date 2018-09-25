@@ -1,9 +1,18 @@
---- 
+---
 language: python
 
-python: 
-  - "2.7"
+python:
+- '2.7'
 
-script: 
-  - pip list
-  - make
+script:
+- pip list
+- make
+
+deploy:
+  provider: pypi
+  server: https://test.pypi.org/legacy/
+  user: dallinb
+  password:
+    secure: PG6+awp0Q/H/GeLd8VZa+lcYB/6VJi+V9XuPfNV1yAjCi4x5gLIHaMJ2VImfpRPYsFSiNEL8F1N6YOZOdqT/qeyudlWabcCytY/NC5o/TDH9U8vjhpEZznmLnKO4Rhb1CoshxfgOlbchTOB5AotevziVP4eWGzRrwg9EAmG8AJWFFSm1e9gDcWs4VPs1E6BiNRTY3tW3hziLcLonMNsSQZDPTWbBgBkPSYRg0YJAtQa8khpMt8Vm0N3AYBBc/o+djKOJ7mpRQXtUaPsPTJPJHSeR5K9wmkMwqyZPUzwOClQs79N4noZJCjle/PPwE3Yr8JGnz/wC2QqpG3TzoZwjd/i8/puCL58B7Kvx+m8PXmQbl8icAiyvkciSXWYmLIIGH+zyIJ8yjbVZamZCKZeTo8FfKPBT43SweFBIUx44gC3gvLh1RlpiUN8manL/slaviX49XFF6b+B3Fc33pJ3bzPH18MciICegs205PkjQ7po08aWsTZl0EQ06H6YZZ04pEnW2eLJOFAKEmCpe6Tint9AnBGNZ05P72HNsRFm7w5t4psuCjsqNSdpENJqqS1v2t2GHEs6KY8w60k6z0KN1mDM0XvRdwRXZBpjrwEPADTGicN3YZBqoabBfcthYmnCWwDh1BwSZhp7Qx1rHI0pCk1cDYSzbEKQK141YBQrmENc=
+  on:
+    branch: develop
