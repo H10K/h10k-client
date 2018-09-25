@@ -1,0 +1,7 @@
+[run]
+source=
+    .
+omit=
+    ./h10kcli/tests/*
+    ./h10kcli/version.py
+    setup.py

@@ -1,0 +1,4 @@
+---
+ambari:
+  cluster_name: h10kdemo
+  instance_type: t2.micro
