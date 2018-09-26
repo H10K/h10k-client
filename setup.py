@@ -28,7 +28,8 @@ setup(
         'console_scripts': ['h10k=h10kcli.__init__:main'],
     },
     install_requires=[
-        'PyYAML'
+        'PyYAML',
+        'requests'
     ],
     license='BSD-3-Clause',
     long_description=long_description,

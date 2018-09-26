@@ -1,16 +1,25 @@
 """h10kparser.py: Parse the H10K Config File."""
-import pprint
+import json
 import sys
 
 
 class ParseConfig:
     """A class to check the format of the H10K config file."""
 
-    def __init__(self, dict, filename):
+    def __init__(self, data, filename):
         """Construct a ParseConfigFile object."""
         self.status(0)
         self.filename(filename)
-        self.check_root(dict)
+        self.data(data)
+        self.check_root()
+
+        if self.status() == 0:
+            data = self.merge(data, self.defaults())
+            self.data(data)
+
+    def __str__(self):
+        """Return the class contents as JSON."""
+        return self.json()
 
     def check_ambari(self, data):
         """Parse the ambari settings."""
@@ -26,10 +35,11 @@ class ParseConfig:
             elif key == 'instance_type':
                 self.validate_instance_type('ambari', data['instance_type'])
 
-    def check_root(self, data):
+    def check_root(self):
         """Parse the top level of the configuration file."""
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(data)
+        data = self.data()
         mandatory = ['ambari']
 
         if type(data) is not dict:
@@ -44,11 +54,41 @@ class ParseConfig:
             elif key == 'ambari':
                 self.check_ambari(data['ambari'])
 
+    def data(self, data=None):
+        """Get/set the object data."""
+        if data is not None:
+            self._data = data
+        return self._data
+
+    def defaults(self):
+        """Return the class defaults."""
+        return {
+            'ambari': {
+                'username': 'h10k'
+            }
+        }
+
     def filename(self, filename=None):
         """Get/set the file name."""
         if filename is not None:
             self._filename = filename
         return self._filename
+
+    def json(self):
+        """Return the object data to JSON."""
+        return json.dumps(self.data())
+
+    def merge(self, source, destination):
+        """Deep merge two dictionaries."""
+        for key, value in source.items():
+            if isinstance(value, dict):
+                # get node or create one
+                node = destination.setdefault(key, {})
+                self.merge(value, node)
+            else:
+                destination[key] = value
+
+        return destination
 
     def status(self, status=None):
         """Get/set the file name."""
