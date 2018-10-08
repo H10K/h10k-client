@@ -1,5 +1,6 @@
 """h10kparser.py: Parse the H10K Config File."""
 import json
+import os
 import sys
 
 
@@ -10,12 +11,19 @@ class ParseConfig:
         """Construct a ParseConfigFile object."""
         self.status(0)
         self.filename(filename)
+
+        if type(data) is not dict:
+            sys.stderr.write("E010: %s doesn't seem to be valid YAML\n" %
+                             self.filename())
+            self.status(10)
+            return
+
+        default_data = self.defaults()
+        merged_data = self.merge(data, default_data)
+        envconfig = self.get_environment_config()
+        data = self.merge(envconfig, merged_data)
         self.data(data)
         self.check_root()
-
-        if self.status() == 0:
-            data = self.merge(data, self.defaults())
-            self.data(data)
 
     def __str__(self):
         """Return the class contents as JSON."""
@@ -25,15 +33,20 @@ class ParseConfig:
         """Parse the ambari settings."""
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(data)
-        mandatory = ['cluster_name', 'instance_type']
-        optional = ['username', 'password']
+        mandatory = ['clustername', 'instancetype', 'password', 'username']
 
         for key in data:
-            if (key not in mandatory) and (key not in optional):
+            if key not in mandatory:
                 sys.stderr.write("E030: Invalid key %s in ambari.\n" % key)
                 return self.status(30)
-            elif key == 'instance_type':
-                self.validate_instance_type('ambari', data['instance_type'])
+            elif key == 'instancetype':
+                self.validate_instance_type('ambari', data['instancetype'])
+
+        # Check for mandatory keys
+        for key in mandatory:
+            if key not in data.keys():
+                sys.stderr.write("E050: Missing key %s in ambari.\n" % key)
+                return self.status(50)
 
     def check_root(self):
         """Parse the top level of the configuration file."""
@@ -42,17 +55,22 @@ class ParseConfig:
         data = self.data()
         mandatory = ['ambari']
 
-        if type(data) is not dict:
-            sys.stderr.write("E010: %s doesn't seem to be valid YAML\n" %
-                             self.filename())
-            return self.status(10)
-
         for key in data:
             if key not in mandatory:
                 sys.stderr.write("E020: Invalid key %s.\n" % key)
                 return self.status(20)
             elif key == 'ambari':
                 self.check_ambari(data['ambari'])
+
+    def create_envconfig_node(self, parent, data_keys, value):
+        """Create a single data node from an environment variable."""
+        if len(data_keys) == 1:
+            return {data_keys[0]: value}
+        else:
+            parent = data_keys[0]
+            data_keys.pop(0)
+            child = self.create_envconfig_node(parent, data_keys, value)
+            return {parent: child}
 
     def data(self, data=None):
         """Get/set the object data."""
@@ -73,6 +91,19 @@ class ParseConfig:
         if filename is not None:
             self._filename = filename
         return self._filename
+
+    def get_environment_config(self):
+        """Extract config values from environment variables."""
+        envconfig = {}
+
+        for key in os.environ.keys():
+            if key.startswith('H10K_CONFIG_'):
+                data_keys = key.lower().split('_')[2:]
+                value = os.environ[key]
+                node = self.create_envconfig_node(None, data_keys, value)
+                envconfig = self.merge(node, envconfig)
+
+        return envconfig
 
     def json(self):
         """Return the object data to JSON."""

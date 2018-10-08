@@ -1,4 +1,5 @@
 ---
 ambari:
-  cluster_name: h10kdemo
-  instance_type: t2.micro
+  clustername: h10kdemo
+  instancetype: t2.micro
+  password: spameggs

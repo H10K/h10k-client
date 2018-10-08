@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """__init__.py: CLI entry point for H10K Client."""
 import argparse
+import json
 import os
 import pprint
 import requests
@@ -48,7 +49,7 @@ def main():
                         help="Config file for H10K (default: h10k.yml).")
     parser.add_argument("-t", "--token",
                         help="API token.")
-    parser.add_argument("-w", "--wapi", default="https://api.h10k.io/",
+    parser.add_argument("-w", "--wapi", default="https://api.h10k.io/v1",
                         help="Web API endpoint (for development only).")
     args = parser.parse_args()
 
@@ -79,15 +80,19 @@ def main():
 
     url = args.wapi
     data = h10k_config.data()
-    headers = {'Authorization': 'Token: %s' % apitoken}
+    headers = {'Authorization': 'Token %s' % apitoken}
 
     try:
         if args.action == 'create':
-            response = requests.put(url, data=data, headers=headers)
+            response = requests.post('%s/create' % url, data=json.dumps(data),
+                                     headers=headers)
         elif args.action == 'delete':
-            response = requests.delete(url, data=data, headers=headers)
+            response = requests.delete('%s/delete' % url,
+                                       data=json.dumps(data),
+                                       headers=headers)
         elif args.action == 'status':
-            response = requests.delete(url, data=data, headers=headers)
+            response = requests.get('%s/status' % url, data=json.dumps(data),
+                                    headers=headers)
     except Exception as err:
         print("Exception error: {0}".format(err))
         sys.exit(2)

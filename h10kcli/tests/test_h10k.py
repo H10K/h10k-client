@@ -20,8 +20,8 @@ class TestH10K(TestCase):
         data = {
             'ambari': {
                 'foo': 'bar',
-                'cluster_name': 'h10kdemo',
-                'instance_type': 't2.micro'
+                'clustername': 'h10kdemo',
+                'instancetype': 't2.micro'
             }
         }
         test = ParseConfig(data, 'h10k.yml')
@@ -30,8 +30,9 @@ class TestH10K(TestCase):
     def test_t041(self):
         data = {
             'ambari': {
-                'cluster_name': 'h10kdemo',
-                'instance_type': 42
+                'clustername': 'h10kdemo',
+                'instancetype': 42,
+                'password': 'topsecret'
             }
         }
         test = ParseConfig(data, 'h10k.yml')
@@ -40,9 +41,20 @@ class TestH10K(TestCase):
     def test_t042(self):
         data = {
             'ambari': {
-                'cluster_name': 'h10kdemo',
-                'instance_type': 't2.grunt'
+                'clustername': 'h10kdemo',
+                'instancetype': 't2.grunt',
+                'password': 'topsecret'
             }
         }
         test = ParseConfig(data, 'h10k.yml')
         self.assertTrue(test.status() == 40)
+
+    def test_t050(self):
+        data = {
+            'ambari': {
+                'clustername': 'h10kdemo',
+                'instancetype': 't2.micro'
+            }
+        }
+        test = ParseConfig(data, 'h10k.yml')
+        self.assertTrue(test.status() == 50)
